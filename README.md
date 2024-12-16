@@ -48,7 +48,7 @@ CFX provides API keys for this action.
 | -------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | cookie               | The Forum Cookie to authenticate                          | Go to [forum.cfx.re](https://forum.cfx.re) and inspect the page with your browser's dev tools. Then search for the `_t` cookie.                                                      |
 | zipPath              | The path to your ZIP file that should be uploaded         | This is the file location of your packed ZIP file inside the Workflow Container, usually stored in `/home/...`.                                                                      |
-| assetId              | The Asset ID, which is a unique ID in the portal          | The Asset ID can be found at [portal.cfx.re](https://portal.cfx.re/assets/created-assets). ![image](https://github.com/user-attachments/assets/885b6e8d-93b6-48c2-a7c0-631badd6f58d) |
+| assetId              | The Asset ID, which is a unique ID in the portal          | The Asset ID can be found at [portal.cfx.re](https://portal.cfx.re/assets/created-assets). ![image](https://github.com/user-attachments/assets/4176b7e7-cfbb-4e14-a488-04c4301f6082) |
 | chunkSize (Optional) | How large one chunk is for upload. Default: 2097152 bytes |                                                                                                                                                                                      |
 
 ## How to Contribute
