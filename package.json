@@ -1,16 +1,16 @@
 {
-  "name": "typescript-action",
-  "description": "GitHub Actions TypeScript template",
+  "name": "cfx-portal-upload",
+  "description": "Re-Upload your escrow resources to portal.cfx.re using GitHub Actions",
   "version": "0.0.0",
   "author": "",
   "private": true,
-  "homepage": "https://github.com/actions/typescript-action",
+  "homepage": "https://github.com/Tynopia/cfx-portal-upload",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/Tynopia/cfx-portal-upload.git"
   },
   "bugs": {
-    "url": "https://github.com/actions/typescript-action/issues"
+    "url": "https://github.com/Tynopia/cfx-portal-upload/issues"
   },
   "keywords": [
     "actions",
@@ -67,7 +67,11 @@
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.11.1"
+    "@actions/core": "^1.11.1",
+    "@puppeteer/browsers": "^2.6.1",
+    "axios": "^1.7.9",
+    "form-data": "^4.0.1",
+    "puppeteer": "^23.10.4"
   },
   "devDependencies": {
     "@github/local-action": "^2.2.1",
@@ -87,5 +91,15 @@
     "prettier-eslint": "^16.3.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.7.2"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/github"
+    ]
   }
 }

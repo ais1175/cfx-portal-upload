@@ -1,23 +1,25 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Upload Escrow Asset'
+description: 'Uploads an escrow asset to the cfx portal'
+author: 'Lukas Leisten'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'upload-cloud'
+  color: 'gray-dark'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  cookie:
+    description: 'Your Forum Account Cookie'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  zipPath:
+    description: 'The path to the zip file to upload'
+    required: true
+  assetId:
+    description: 'The asset id to re-upload'
+    required: true
+  chunkSize:
+    description: 'The chunk size to split the file into'
+    required: true
+    default: 2097152
 
 runs:
   using: node20

@@ -8,82 +8,116 @@
 
 import * as core from '@actions/core'
 import * as main from '../src/main'
+import puppeteer from 'puppeteer'
+import { Browser } from 'puppeteer'
 
 // Mock the action's main function
 const runMock = jest.spyOn(main, 'run')
 
-// Other utilities
-const timeRegex = /^\d{2}:\d{2}:\d{2}/
-
 // Mock the GitHub Actions core library
 let debugMock: jest.SpiedFunction<typeof core.debug>
-let errorMock: jest.SpiedFunction<typeof core.error>
+let infoMock: jest.SpiedFunction<typeof core.info>
 let getInputMock: jest.SpiedFunction<typeof core.getInput>
-let setFailedMock: jest.SpiedFunction<typeof core.setFailed>
-let setOutputMock: jest.SpiedFunction<typeof core.setOutput>
 
 describe('action', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
     debugMock = jest.spyOn(core, 'debug').mockImplementation()
-    errorMock = jest.spyOn(core, 'error').mockImplementation()
+    infoMock = jest.spyOn(core, 'info').mockImplementation()
     getInputMock = jest.spyOn(core, 'getInput').mockImplementation()
-    setFailedMock = jest.spyOn(core, 'setFailed').mockImplementation()
-    setOutputMock = jest.spyOn(core, 'setOutput').mockImplementation()
   })
 
-  it('sets the time output', async () => {
-    // Set the action's inputs as return values from core.getInput()
+  it('should fail if chunkSize is not a number', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
-        case 'milliseconds':
-          return '500'
+        case 'chunkSize':
+          return 'invalid'
         default:
           return ''
       }
     })
 
-    await main.run()
-    expect(runMock).toHaveReturned()
+    const setFailedMock = jest.spyOn(core, 'setFailed')
 
-    // Verify that all of the core library functions were called correctly
-    expect(debugMock).toHaveBeenNthCalledWith(1, 'Waiting 500 milliseconds ...')
-    expect(debugMock).toHaveBeenNthCalledWith(
-      2,
-      expect.stringMatching(timeRegex)
+    await main.run()
+
+    expect(runMock).toHaveReturned()
+    expect(setFailedMock).toHaveBeenCalledWith(
+      'Invalid chunk size. Must be a number.'
     )
-    expect(debugMock).toHaveBeenNthCalledWith(
-      3,
-      expect.stringMatching(timeRegex)
-    )
-    expect(setOutputMock).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      expect.stringMatching(timeRegex)
-    )
-    expect(errorMock).not.toHaveBeenCalled()
   })
 
-  it('sets a failed status', async () => {
-    // Set the action's inputs as return values from core.getInput()
+  it('should navigate to SSO URL and parse response body', async () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
-        case 'milliseconds':
-          return 'this is not a number'
+        case 'chunkSize':
+          return '1024'
+        case 'cookie':
+        case 'assetId':
+        case 'zipPath':
+          return 'test-value'
         default:
           return ''
       }
     })
 
-    await main.run()
-    expect(runMock).toHaveReturned()
+    const gotoMock = jest.fn()
+    const evaluateMock = jest
+      .fn()
+      .mockResolvedValue({ url: 'https://forum.cfx.re' })
+    const setCookieMock = jest.fn()
 
-    // Verify that all of the core library functions were called correctly
-    expect(setFailedMock).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds not a number'
+    const newPageMock = jest.fn().mockResolvedValue({
+      goto: gotoMock,
+      evaluate: evaluateMock,
+      url: jest.fn().mockReturnValue('https://portal.cfx.re')
+    })
+    const browserCloseMock = jest.fn()
+
+    jest.spyOn(puppeteer, 'launch').mockResolvedValue({
+      newPage: newPageMock,
+      close: browserCloseMock,
+      setCookie: setCookieMock
+    } as unknown as Browser)
+
+    await main.run()
+
+    expect(infoMock).toHaveBeenCalledWith('Navigating to SSO URL ...')
+
+    expect(gotoMock).toHaveBeenCalledWith(
+      'https://portal-api.cfx.re/v1/auth/discourse?return=',
+      {
+        waitUntil: 'networkidle0'
+      }
     )
-    expect(errorMock).not.toHaveBeenCalled()
+
+    expect(evaluateMock).toHaveBeenCalledTimes(2)
+
+    expect(infoMock).toHaveBeenCalled()
+    expect(infoMock).toHaveBeenCalledWith('Navigating to SSO URL ...')
+    expect(infoMock).toHaveBeenCalledWith(
+      'Navigated to SSO URL. Parsing response body ...'
+    )
+    expect(debugMock).toHaveBeenCalledWith('Parsed response body.')
+    expect(infoMock).toHaveBeenCalledWith('Redirected to Forum Origin ...')
+    expect(infoMock).toHaveBeenCalledWith('Setting cookies ...')
+    expect(infoMock).toHaveBeenCalledWith('Redirected to Forum Origin ...')
+
+    expect(setCookieMock).toHaveBeenCalledWith({
+      name: '_t',
+      value: 'test-value',
+      domain: 'forum.cfx.re',
+      path: '/',
+      expires: -1,
+      size: 1,
+      httpOnly: true,
+      secure: true,
+      session: false
+    })
+
+    expect(gotoMock).toHaveBeenCalledWith('https://forum.cfx.re')
+
+    expect(browserCloseMock).toHaveBeenCalled()
   })
 })
