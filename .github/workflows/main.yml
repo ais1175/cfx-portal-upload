@@ -1,0 +1,2 @@
+- name: Upload Escrow Asset
+  uses: Tynopia/cfx-portal-upload@v1.0.0
